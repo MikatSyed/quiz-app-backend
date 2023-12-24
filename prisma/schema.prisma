@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Authentication
+model User {
+  id          String        @id @default(uuid())
+  username    String        @unique
+  email       String        @unique
+  password    String
+  role        Role          @default(performer)
+  quizzes     QuizTaker[]
+  Categories  Category[]
+  Leaderboard Leaderboard[]
+}
+
+// Quiz Creation and Management
+model Category {
+  id          String        @id @default(uuid())
+  title       String
+  createdById String
+  createdBy   User          @relation(fields: [createdById], references: [id])
+  questions   Question[]
+  QuizTaker   QuizTaker[]
+  Leaderboard Leaderboard[]
+}
+
+// Modify Question model to reference Quiz
+model Question {
+  id              String   @id @default(uuid())
+  content         String
+  correctOptionId String
+  Category        Category @relation(fields: [CategoryId], references: [id])
+  CategoryId      String
+  options         Option[]
+}
+
+// Add a new enum for OptionType
+enum OptionType {
+  A
+  B
+  C
+  D
+}
+
+// Modify Option model to include type
+model Option {
+  id         String     @id @default(uuid())
+  content    String
+  type       OptionType
+  question   Question   @relation(fields: [questionId], references: [id])
+  questionId String
+}
+
+// Quiz Taking
+model QuizTaker {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  Categories Category @relation(fields: [quizId], references: [id])
+  quizId     String
+  answers    Answer[]
+  score      Int
+}
+
+model Answer {
+  id          String    @id @default(uuid())
+  quizTaker   QuizTaker @relation(fields: [quizTakerId], references: [id])
+  quizTakerId String
+}
+
+// Score Tracking
+model Leaderboard {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  Categories Category @relation(fields: [quizId], references: [id])
+  quizId     String
+  score      Int
+}
+
+enum Role {
+  admin
+  performer
+}
