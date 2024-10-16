@@ -20,6 +20,7 @@ model User {
   quizzes     QuizTaker[]
   Categories  Category[]
   Leaderboard Leaderboard[]
+  createdAt   DateTime      @default(now()) 
 }
 
 // Quiz Creation and Management
@@ -31,6 +32,7 @@ model Category {
   questions   Question[]
   QuizTaker   QuizTaker[]
   Leaderboard Leaderboard[]
+  createdAt   DateTime      @default(now()) 
 }
 
 // Modify Question model to reference Quiz
@@ -41,6 +43,7 @@ model Question {
   Category        Category @relation(fields: [CategoryId], references: [id])
   CategoryId      String
   options         Option[]
+  createdAt       DateTime @default(now()) 
 }
 
 // Add a new enum for OptionType
@@ -58,6 +61,7 @@ model Option {
   type       OptionType
   question   Question   @relation(fields: [questionId], references: [id])
   questionId String
+  createdAt  DateTime   @default(now()) 
 }
 
 // Quiz Taking
@@ -69,22 +73,24 @@ model QuizTaker {
   quizId     String
   answers    Answer[]
   score      Int
+  createdAt  DateTime  @default(now()) 
 }
 
 model Answer {
   id          String    @id @default(uuid())
   quizTaker   QuizTaker @relation(fields: [quizTakerId], references: [id])
   quizTakerId String
+  createdAt   DateTime  @default(now()) 
 }
 
-// Score Tracking
 model Leaderboard {
   id         String   @id @default(uuid())
-  user       User     @relation(fields: [userId], references: [id])
   userId     String
-  Categories Category @relation(fields: [quizId], references: [id])
-  quizId     String
+  user       User     @relation(fields: [userId], references: [id])
+  categoryId String
+  Categories Category @relation(fields: [categoryId], references: [id])
   score      Int
+  createdAt  DateTime  @default(now()) 
 }
 
 enum Role {

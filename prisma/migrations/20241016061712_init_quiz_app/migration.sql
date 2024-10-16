@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "OptionType" AS ENUM ('A', 'B', 'C', 'D');
+
+-- CreateEnum
 CREATE TYPE "Role" AS ENUM ('admin', 'performer');
 
 -- CreateTable
@@ -7,19 +10,18 @@ CREATE TABLE "User" (
     "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "role" "Role" NOT NULL,
+    "role" "Role" NOT NULL DEFAULT 'performer',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Quiz" (
+CREATE TABLE "Category" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "category" TEXT NOT NULL,
     "createdById" TEXT NOT NULL,
 
-    CONSTRAINT "Quiz_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -27,7 +29,7 @@ CREATE TABLE "Question" (
     "id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "correctOptionId" TEXT NOT NULL,
-    "quizId" TEXT NOT NULL,
+    "CategoryId" TEXT NOT NULL,
 
     CONSTRAINT "Question_pkey" PRIMARY KEY ("id")
 );
@@ -36,6 +38,7 @@ CREATE TABLE "Question" (
 CREATE TABLE "Option" (
     "id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
+    "type" "OptionType" NOT NULL,
     "questionId" TEXT NOT NULL,
 
     CONSTRAINT "Option_pkey" PRIMARY KEY ("id")
@@ -54,8 +57,6 @@ CREATE TABLE "QuizTaker" (
 -- CreateTable
 CREATE TABLE "Answer" (
     "id" TEXT NOT NULL,
-    "questionId" TEXT NOT NULL,
-    "optionId" TEXT NOT NULL,
     "quizTakerId" TEXT NOT NULL,
 
     CONSTRAINT "Answer_pkey" PRIMARY KEY ("id")
@@ -78,10 +79,10 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- AddForeignKey
-ALTER TABLE "Quiz" ADD CONSTRAINT "Quiz_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Category" ADD CONSTRAINT "Category_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Question" ADD CONSTRAINT "Question_quizId_fkey" FOREIGN KEY ("quizId") REFERENCES "Quiz"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Question" ADD CONSTRAINT "Question_CategoryId_fkey" FOREIGN KEY ("CategoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Option" ADD CONSTRAINT "Option_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -90,13 +91,7 @@ ALTER TABLE "Option" ADD CONSTRAINT "Option_questionId_fkey" FOREIGN KEY ("quest
 ALTER TABLE "QuizTaker" ADD CONSTRAINT "QuizTaker_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "QuizTaker" ADD CONSTRAINT "QuizTaker_quizId_fkey" FOREIGN KEY ("quizId") REFERENCES "Quiz"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Answer" ADD CONSTRAINT "Answer_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Answer" ADD CONSTRAINT "Answer_optionId_fkey" FOREIGN KEY ("optionId") REFERENCES "Option"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "QuizTaker" ADD CONSTRAINT "QuizTaker_quizId_fkey" FOREIGN KEY ("quizId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Answer" ADD CONSTRAINT "Answer_quizTakerId_fkey" FOREIGN KEY ("quizTakerId") REFERENCES "QuizTaker"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -105,4 +100,4 @@ ALTER TABLE "Answer" ADD CONSTRAINT "Answer_quizTakerId_fkey" FOREIGN KEY ("quiz
 ALTER TABLE "Leaderboard" ADD CONSTRAINT "Leaderboard_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Leaderboard" ADD CONSTRAINT "Leaderboard_quizId_fkey" FOREIGN KEY ("quizId") REFERENCES "Quiz"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Leaderboard" ADD CONSTRAINT "Leaderboard_quizId_fkey" FOREIGN KEY ("quizId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

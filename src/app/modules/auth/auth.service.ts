@@ -13,17 +13,33 @@ import {
 } from './auth.interface';
 
 const signup = async (data: User): Promise<Partial<User>> => {
-  const { username, email, password,role } = data;
+  console.log(data);
+  const { username, email, password, role } = data;
+
+  // Check if the username already exists
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      username: username,
+    },
+  });
+
+  if (existingUser) {
+    // Username already exists, handle the error or return an appropriate response
+    throw new Error('Username is already taken');
+  }
+
   const hashedPassword = await bcrypt.hash(
     password,
     Number(config.bycrypt_salt_rounds)
   );
+
+  // Create the new user
   const result = await prisma.user.create({
     data: {
       username,
       email,
       password: hashedPassword,
-      role
+      role,
     },
   });
 
